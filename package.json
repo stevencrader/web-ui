@@ -34,7 +34,7 @@
         "redux-thunk": "^2.3.0",
         "reduxsauce": "^1.1.2",
         "shortid": "^2.2.15",
-        "typesafe-actions": "^5.1.0"
+        "video-react": "^0.14.1"
     },
     "devDependencies": {
         "@babel/core": "^7.11.6",

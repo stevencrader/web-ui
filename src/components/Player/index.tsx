@@ -1,9 +1,12 @@
 import * as React from 'react'
 import AudioPlayer from 'react-h5-audio-player'
+// @ts-ignore
+import {Player as VideoPlayer} from 'video-react';
 import {Link} from "react-router-dom";
 import {getPrettyDate} from "../../utils";
 
 import 'react-h5-audio-player/src/styles.scss'
+import 'video-react/dist/video-react.css';
 import './styles.scss'
 
 interface IProps {
@@ -19,6 +22,7 @@ export default class Player extends React.Component<IProps> {
     }
 
     player = React.createRef<AudioPlayer>()
+    videoPlayer = React.createRef<VideoPlayer>()
 
     constructor(props: IProps) {
         super(props)
@@ -29,21 +33,29 @@ export default class Player extends React.Component<IProps> {
     }
 
     onCanPlay() {
-        if (this.props.onCanPlay){
+        if (this.props.onCanPlay) {
             this.props.onCanPlay()
         }
     }
 
-    play(){
-        this.player.current.audio.current.play()
+    play() {
+        if (this.player.current){
+            this.player.current.audio.current.play()
+        } else {
+            this.videoPlayer.current.play()
+        }
     }
 
-    pause(){
-        this.player.current.audio.current.pause()
+    pause() {
+        if (this.player.current){
+            this.player.current.audio.current.pause()
+        } else {
+            this.videoPlayer.current.pause()
+        }
     }
 
     onPlay() {
-        if (this.props.onPlay){
+        if (this.props.onPlay) {
             this.props.onPlay()
         }
         this.setState({
@@ -52,7 +64,7 @@ export default class Player extends React.Component<IProps> {
     }
 
     onPause() {
-        if (this.props.onPause){
+        if (this.props.onPause) {
             this.props.onPause()
         }
         this.setState({
@@ -63,11 +75,11 @@ export default class Player extends React.Component<IProps> {
     render() {
         const {episode} = this.props
         const date = getPrettyDate(episode.datePublished)
+        const enclosureType = episode.enclosureType
         return (
             <div className="player-media-controls">
-                <AudioPlayer
-                    ref={this.player}
-                    header={
+                {enclosureType.startsWith("video") && window.location.pathname.startsWith("/podcast/") ?
+                    <div>
                         <div className="player-info">
                             <div className="player-show-title">
                                 <p title={episode.title}>{episode.title}</p>
@@ -84,25 +96,61 @@ export default class Player extends React.Component<IProps> {
                                 <time dateTime={date}>{date}</time>
                             </p>
                         </div>
-                    }
-                    autoPlayAfterSrcChange={false}
-                    autoPlay={false}
-                    src={episode.enclosureUrl}
-                    onCanPlay={this.onCanPlay}
-                    onPlay={this.onPlay}
-                    onPause={this.onPause}
-                    onEnded={this.onPause}
-                    customAdditionalControls={[
-                        <a
-                            className="player-feed-button"
-                            // href={}
-                            style={{width: 30}}
-                        >
-                            {/* <img src={FeedIcon} /> */}
-                        </a>,
-                    ]}
+                        <div className="video-player">
+                            <VideoPlayer
+                                ref={this.videoPlayer}
+                                className="video-player-controls"
+                                autoplay={true}
+                                src={episode.enclosureUrl}
+                                poster={episode.image}
+                                onCanPlay={this.onCanPlay}
+                                onPlaying={this.onPlay}
+                                onPause={this.onPause}
+                                onEnded={this.onPause}
+                            >
+                            </VideoPlayer>
+                        </div>
+                    </div>
+                    :
+                    <AudioPlayer
+                        ref={this.player}
+                        header={
+                            <div className="player-info">
+                                <div className="player-show-title">
+                                    <p title={episode.title}>{episode.title}</p>
+                                </div>
+                                <div className="player-podcast-name">
+                                    {episode.feedTitle !== undefined ?
+                                        <Link to={`/podcast/${episode.feedId}`} title={episode.feedTitle}>
+                                            from: {episode.feedTitle}
+                                        </Link>
+                                        : ""
+                                    }
+                                </div>
+                                <p>
+                                    <time dateTime={date}>{date}</time>
+                                </p>
+                            </div>
+                        }
+                        autoPlayAfterSrcChange={false}
+                        autoPlay={false}
+                        src={episode.enclosureUrl}
+                        onCanPlay={this.onCanPlay}
+                        onPlay={this.onPlay}
+                        onPause={this.onPause}
+                        onEnded={this.onPause}
+                        customAdditionalControls={[
+                            <a
+                                className="player-feed-button"
+                                // href={}
+                                style={{width: 30}}
+                            >
+                                {/* <img src={FeedIcon} /> */}
+                            </a>,
+                        ]}
 
-                />
+                    />
+                }
             </div>
         )
     }
