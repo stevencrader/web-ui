@@ -1,26 +1,28 @@
+import CSS from "csstype"
 import * as React from 'react'
 import ReactList from 'react-list'
 import ReactLoading from 'react-loading'
-import PodcastHeader from '../../../components/PodcastHeader'
-import Player from '../../../components/Player'
-import EpisodeItem from '../../../components/EpisodeItem'
-import {fixURL, updateTitle} from '../../../utils'
-import {decode} from 'he'
+import PodcastHeader from '../../components/PodcastHeader'
+import Player from '../../components/Player'
+import EpisodeItem from '../../components/EpisodeItem'
+import { fixURL, updateTitle } from '../../utils'
+import { decode } from 'he'
+
 
 import './styles.scss'
+import SyncButton from "./SyncButton";
 
 interface IProps {
-    match: any
-    result?: Object
 }
 
-export default class PodcastInfo extends React.PureComponent<IProps> {
+export default class Recent extends React.PureComponent<IProps> {
     state = {
-        result: Object(),
+        lastId: null,
         episodes: [],
         loading: true,
         selectedEpisode: undefined,
         playing: false,
+        syncEnabled: true,
     }
     _isMounted = false
     player = React.createRef<Player>()
@@ -32,23 +34,20 @@ export default class PodcastInfo extends React.PureComponent<IProps> {
         this.onEpisodePlay = this.onEpisodePlay.bind(this)
         this.onEpisodePause = this.onEpisodePause.bind(this)
         this.onEpisodeCanPlay = this.onEpisodeCanPlay.bind(this)
+        this.syncClicked = this.syncClicked.bind(this)
     }
 
     async componentDidMount(): Promise<void> {
         this._isMounted = true
 
-        let id = this.props.match.params.podcastId
-        if (id) {
-            const result = (await this.getPodcastInfo(id)).feed
-            const episodes = (await this.getEpisodes(id)).items
-            if (this._isMounted) {
-                this.setState({
-                    loading: false,
-                    result,
-                    episodes,
-                    selectedEpisode: episodes[0],
-                })
-            }
+        const episodes = (await this.getRecentEpisodes()).items
+        if (this._isMounted) {
+            this.setState({
+                loading: false,
+                episodes,
+                selectedEpisode: episodes[0],
+                lastId: episodes[episodes.length - 1].id
+            })
         }
     }
 
@@ -57,33 +56,16 @@ export default class PodcastInfo extends React.PureComponent<IProps> {
     }
 
     async componentDidUpdate(prevProps) {
-        let id = this.props.match.params.podcastId
-        if (id !== prevProps.match.params.podcastId) {
-            this.setState({
-                loading: true,
-            })
-            const result = (await this.getPodcastInfo(id)).feed
-            const episodes = (await this.getEpisodes(id)).items
-            this.setState({
-                loading: false,
-                result,
-                episodes,
-                selectedEpisode: episodes[0],
-            })
+
+    }
+
+    async getRecentEpisodes() {
+        const {lastId} = this.state
+        let param = ""
+        if (lastId !== null) {
+            param = `?before=${lastId}`
         }
-    }
-
-    async getPodcastInfo(id: string) {
-        let response = await fetch(`/api/podcasts/byfeedid?id=${id}`, {
-            // credentials: 'same-origin',
-            method: 'GET',
-        })
-        return await response.json()
-    }
-
-    async getEpisodes(id: string) {
-        let response = await fetch(`/api/episodes/byfeedid?id=${id}`, {
-            // credentials: 'same-origin',
+        let response = await fetch(`/api/recent/episodes${param}`, {
             method: 'GET',
         })
         return await response.json()
@@ -139,36 +121,42 @@ export default class PodcastInfo extends React.PureComponent<IProps> {
         }
     }
 
-    renderHeader() {
-        let title = this.state.result.title
-        let image = this.state.result.image || this.state.result.artwork
-        let author = this.state.result.author
-        let description = this.state.result.description
-        let categories = this.state.result.categories
-        let value = this.state.result.value
-        let id = this.state.result.id
-        let podcastURL = fixURL(this.state.result.link)
-        let feedURL = fixURL(this.state.result.url)
-        let donationPageURL = null
-        if (this.state.result.funding) // not null, exists
-        {
-            donationPageURL = this.state.result.funding?.url
+    /**
+     * Start/stop sync
+     *
+     * @param sync set sync value specifically instead of flipping current state
+     */
+    private readonly syncClicked = (sync?: boolean): void => {
+        let {syncEnabled} = this.state
+        if (sync !== undefined) {
+            syncEnabled = !sync
         }
 
-        updateTitle(title)
+        this.setState({
+            syncEnabled: !syncEnabled
+        })
+
+        if (syncEnabled) {
+            // // verify stream is false
+            // this.setState({
+            //     newStream: false,
+            // })
+            // this.stream.pause()
+            // // @ts-ignore
+            // this.stream.destroy()
+        } else {
+            // this.startStream()
+        }
+    }
+
+    renderHeader() {
         return (
-            <PodcastHeader
-                title={title}
-                author={author}
-                image={image}
-                description={description}
-                categories={categories}
-                value={value}
-                id={id}
-                podcastURL={podcastURL}
-                donationPageURL={donationPageURL}
-                feedURL={feedURL}
-            />
+            <div className="recent-header">
+                <h2 className="episode-header">Recent Episodes</h2>
+                <SyncButton
+                    onClick={this.syncClicked}
+                />
+            </div>
         )
     }
 
@@ -195,7 +183,6 @@ export default class PodcastInfo extends React.PureComponent<IProps> {
     renderEpisodes() {
         return (
             <div className="episodes-list">
-                <h2 className="episode-header">Episodes</h2>
                 {
                     this.state.episodes.length > 0
                         ?
@@ -220,9 +207,7 @@ export default class PodcastInfo extends React.PureComponent<IProps> {
         // try to use episode image, fall back to feed images
         let image =
             this.state.episodes[index].image ||
-            this.state.episodes[index].feedImage ||
-            this.state.result.image ||
-            this.state.result.artwork
+            this.state.episodes[index].feedImage
         let link = this.state.episodes[index].link
         let enclosureUrl = fixURL(this.state.episodes[index].enclosureUrl)
         let description = decode(this.state.episodes[index].description)
@@ -254,24 +239,30 @@ export default class PodcastInfo extends React.PureComponent<IProps> {
     }
 
     render() {
-        const { loading, result } = this.state
-        if ((result === undefined || result.length === 0) && !loading) {
-            const errorMessage = `Unknown podcast ID: ${this.props.match.params.podcastId}`
-            updateTitle(errorMessage)
-            return <div className="page-content">{errorMessage}</div>
+        const {loading,episodes, syncEnabled} = this.state
+        const syncDisplay = syncEnabled ? "none" : "block"
+        let syncMessageStyle: CSS.Properties = {
+            display: syncDisplay
         }
+
+
         if (loading) {
-            updateTitle('Loading podcast ...')
+            updateTitle('Loading recent podcasts ...')
             return (
-                <div className="loader-wrapper" style={{ height: 300 }}>
-                    <ReactLoading type="cylon" color="#e90000" />
+                <div className="loader-wrapper" style={{height: 300}}>
+                    <ReactLoading type="cylon" color="#e90000"/>
                 </div>
             )
+        } else {
+            updateTitle('Recent Podcasts')
         }
         return (
-            <div className="page-content">
+            <div className="recent-page">
                 {this.renderHeader()}
                 {this.renderPlayer()}
+                <p className="sync-message" style={syncMessageStyle}>
+                    Syncing disabled. Click sync icon or refresh to continue.
+                </p>
                 {this.renderEpisodes()}
             </div>
         )

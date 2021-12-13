@@ -1,14 +1,15 @@
 import * as React from 'react'
 import { Route, Switch } from 'react-router-dom'
-import { history } from './state/store'
+import AddFeed from "./pages/AddFeed";
+import Apps from './pages/Apps'
+import DonationThankYou from './pages/Donations'
 
 import Landing from './pages/landing'
+import Podcast from './pages/Podcast'
+import Recent from "./pages/Recent";
 import Search from './pages/Search'
 import Stats from './pages/Stats'
-import DonationThankYou from './pages/Donations'
-import Podcast from './pages/Podcast'
-import Apps from './pages/Apps'
-import AddFeed from "./pages/AddFeed";
+import { history } from './state/store'
 
 const Routes: React.FunctionComponent = () => (
     <Switch>
@@ -26,7 +27,9 @@ const Routes: React.FunctionComponent = () => (
 
         <Route path="/add" component={AddFeed} />
 
-        <Route component={() => <div>Not Found</div>} />
+        <Route path="/recent" component={Recent} />
+
+        <Route component={() => <div className="loader-wrapper">Not Found</div>} />
     </Switch>
 )
 

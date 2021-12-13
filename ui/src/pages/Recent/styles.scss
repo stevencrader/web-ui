@@ -1,0 +1,36 @@
+.recent-page {
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    width: 1024px;
+
+    .recent-header {
+        display: flex;
+        flex-direction: row;
+        vertical-align: top;
+
+        .sync-button{
+            margin-top: 15px;
+        }
+
+        * {
+            border: 1px dashed black;
+        }
+    }
+
+    .sync-message {
+        text-align: center;
+        font-style: italic;
+    }
+}
+
+.loader-wrapper {
+    margin: 0 auto;
+    position: relative;
+    height: 100%;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}

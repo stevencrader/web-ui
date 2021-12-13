@@ -87,7 +87,7 @@ export default class RecentPodcasts extends React.Component<IProps, IState> {
                         </div>
                         {title && (
                             <div className="player-title">
-                                <b>{title}</b>
+                                <b><Link to="/recent">{title}</Link></b>
                             </div>
                         )}
                         <div className="player-cover-art">

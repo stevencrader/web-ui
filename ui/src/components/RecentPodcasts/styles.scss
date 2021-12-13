@@ -28,13 +28,18 @@
     padding-top: 15px;
     padding-bottom: 10px;
     text-transform: uppercase;
+
+    b a {
+        color: #e64545;
+    }
 }
 
 .player-nav-arrows {
     position: absolute;
     z-index: 0;
     width: inherit;
-    height: 510px;
+    height: 460px;
+    margin-top: 50px;
     button {
         outline: 0;
         border: 0;
