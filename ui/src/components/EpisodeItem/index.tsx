@@ -9,6 +9,7 @@ import EarthLogo from '../../../images/earth.svg'
 import DownloadLogo from '../../../images/download-outline.svg'
 
 import './styles.scss'
+import { Link } from 'react-router-dom'
 
 interface IProps {
     index?: number
@@ -21,6 +22,8 @@ interface IProps {
     datePublished?: number
     onPlay?: any
     onPause?: any
+    feedId?: number
+    feedTitle?: string
 }
 
 export default class EpisodeItem extends React.PureComponent<IProps> {
@@ -75,7 +78,7 @@ export default class EpisodeItem extends React.PureComponent<IProps> {
     }
 
     render() {
-        const {title, image, link, value, enclosureUrl, description, datePublished} = this.props
+        const {title, image, link, value, enclosureUrl, description, datePublished, feedId, feedTitle} = this.props
         const date = getPrettyDate(datePublished)
         const episodeLink = link
         const episodeEnclosure = enclosureUrl
@@ -95,6 +98,16 @@ export default class EpisodeItem extends React.PureComponent<IProps> {
                     </div>
                     <div className="episode-info">
                         <div className="episode-title">{title}</div>
+                        {
+                            feedTitle && feedId
+                                ?
+                                <div className="episode-feed-name">
+                                    <Link to={`/podcast/${feedId}`}>From: {feedTitle}</Link>
+                                </div>
+                                :
+                                <div className="episode-feed-name"></div>
+                        }
+
                         <p className="episode-date">
                             <time dateTime={date}>{date}</time>
                         </p>

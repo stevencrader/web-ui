@@ -1,4 +1,6 @@
 import CSS from "csstype"
+import { response } from "express";
+import { useEffect } from "react";
 import * as React from 'react'
 import ReactList from 'react-list'
 import ReactLoading from 'react-loading'
@@ -23,10 +25,13 @@ export default class Recent extends React.PureComponent<IProps> {
         selectedEpisode: undefined,
         playing: false,
         syncEnabled: true,
+        time: null,
     }
     _isMounted = false
     player = React.createRef<Player>()
     episodeItems: any[] = []
+    interval = null
+    DELAY = 1000; // 1 second
 
     constructor(props) {
         super(props)
@@ -40,23 +45,60 @@ export default class Recent extends React.PureComponent<IProps> {
     async componentDidMount(): Promise<void> {
         this._isMounted = true
 
-        const episodes = (await this.getRecentEpisodes()).items
-        if (this._isMounted) {
-            this.setState({
-                loading: false,
-                episodes,
-                selectedEpisode: episodes[0],
-                lastId: episodes[episodes.length - 1].id
-            })
-        }
+        this.interval = setInterval(() => this.getEpisodes(), this.DELAY);
     }
 
     componentWillUnmount() {
         this._isMounted = false
+        clearInterval(this.interval);
     }
 
     async componentDidUpdate(prevProps) {
+    }
 
+    async getEpisodes() {
+        let {selectedEpisode, episodes, syncEnabled, lastId, playing} = this.state
+
+        // return if sync disabled
+        if (!syncEnabled){
+            return
+        }
+
+        let newEpisodes: Array<any> = (await this.getRecentEpisodes()).items
+
+        let currentEpisodeIds = new Set(episodes.map(episode => episode.id))
+
+        if (newEpisodes === undefined) {
+            newEpisodes = episodes
+        } else {
+            newEpisodes.forEach(episode => {
+                if (!currentEpisodeIds.has(episode.id)){
+                    newEpisodes.push(episode)
+                }
+            })
+        }
+
+        newEpisodes = newEpisodes.sort((a1, a2) => {
+            return a1.id - a2.id
+        })
+        newEpisodes.reverse()
+
+        if (!playing) {
+            selectedEpisode = newEpisodes[0]
+        }
+
+        if (newEpisodes.length !== 0) {
+            lastId = newEpisodes[0].id
+        }
+
+        if (this._isMounted) {
+            this.setState({
+                loading: false,
+                episodes: newEpisodes,
+                selectedEpisode: selectedEpisode,
+                lastId: lastId
+            })
+        }
     }
 
     async getRecentEpisodes() {
@@ -135,18 +177,6 @@ export default class Recent extends React.PureComponent<IProps> {
         this.setState({
             syncEnabled: !syncEnabled
         })
-
-        if (syncEnabled) {
-            // // verify stream is false
-            // this.setState({
-            //     newStream: false,
-            // })
-            // this.stream.pause()
-            // // @ts-ignore
-            // this.stream.destroy()
-        } else {
-            // this.startStream()
-        }
     }
 
     renderHeader() {
@@ -156,6 +186,7 @@ export default class Recent extends React.PureComponent<IProps> {
                 <SyncButton
                     onClick={this.syncClicked}
                 />
+                <div>{this.state.time}</div>
             </div>
         )
     }
@@ -213,6 +244,8 @@ export default class Recent extends React.PureComponent<IProps> {
         let description = decode(this.state.episodes[index].description)
         let datePublished = this.state.episodes[index].datePublished
         let value = this.state.episodes[index].value
+        let feedTitle = this.state.episodes[index].feedTitle
+        let feedId = this.state.episodes[index].feedId
 
         // create a reference to the generated EpisodeItem if one doesn't already exist
         if (index >= this.episodeItems.length) {
@@ -231,6 +264,8 @@ export default class Recent extends React.PureComponent<IProps> {
                     enclosureUrl={enclosureUrl}
                     description={description}
                     datePublished={datePublished}
+                    feedTitle={feedTitle}
+                    feedId={feedId}
                     onPlay={this.onEpisodePlay}
                     onPause={this.onEpisodePause}
                 />
@@ -247,14 +282,14 @@ export default class Recent extends React.PureComponent<IProps> {
 
 
         if (loading) {
-            updateTitle('Loading recent podcasts ...')
+            updateTitle('Loading recent episodes ...')
             return (
                 <div className="loader-wrapper" style={{height: 300}}>
                     <ReactLoading type="cylon" color="#e90000"/>
                 </div>
             )
         } else {
-            updateTitle('Recent Podcasts')
+            updateTitle('Recent Episodes')
         }
         return (
             <div className="recent-page">
