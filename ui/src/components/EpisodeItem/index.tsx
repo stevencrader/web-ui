@@ -1,15 +1,15 @@
 import * as React from 'react'
-import {getPrettyDate, truncateString} from '../../utils'
+import { Link } from 'react-router-dom'
+import DownloadLogo from '../../../images/download-outline.svg'
+import EarthLogo from '../../../images/earth.svg'
+import NoImage from '../../../images/no-cover-art.png'
+import PauseLogo from '../../../images/pause-circle.svg'
+import PlayLogo from '../../../images/play-circle.svg'
+import { getPrettyDate, truncateString } from '../../utils'
 
 import Value from '../Value'
-import NoImage from '../../../images/no-cover-art.png'
-import PlayLogo from '../../../images/play-circle.svg'
-import PauseLogo from '../../../images/pause-circle.svg'
-import EarthLogo from '../../../images/earth.svg'
-import DownloadLogo from '../../../images/download-outline.svg'
 
 import './styles.scss'
-import { Link } from 'react-router-dom'
 
 interface IProps {
     index?: number
@@ -78,10 +78,23 @@ export default class EpisodeItem extends React.PureComponent<IProps> {
     }
 
     render() {
-        const {title, image, link, value, enclosureUrl, description, datePublished, feedId, feedTitle} = this.props
+        const {
+            title,
+            image,
+            link,
+            value,
+            enclosureUrl,
+            description,
+            datePublished,
+            feedId,
+            feedTitle,
+            onPlay,
+            onPause
+        } = this.props
         const date = getPrettyDate(datePublished)
         const episodeLink = link
         const episodeEnclosure = enclosureUrl
+        const showPlayButton = onPlay !== undefined && onPause !== undefined
 
         return (
             <div className="episode">
@@ -141,18 +154,30 @@ export default class EpisodeItem extends React.PureComponent<IProps> {
                                 : ""
                             }
 
-                            <img
-                                alt="Play/pause episode"
-                                className="episode-play-pause-mobile"
-                                src={this.state.playButtonSrc}
-                                onClick={this.togglePlayPause}/>
+                            {
+                                showPlayButton
+                                    ?
+                                    <img
+                                        alt="Play/pause episode"
+                                        className="episode-play-pause-mobile"
+                                        src={this.state.playButtonSrc}
+                                        onClick={this.togglePlayPause}/>
+                                    :
+                                    <div/>
+                            }
                         </div>
                     </div>
-                    <img
-                        alt="Play/pause episode"
-                        className="episode-play-pause"
-                        src={this.state.playButtonSrc}
-                        onClick={this.togglePlayPause}/>
+                    {
+                        showPlayButton
+                            ?
+                            <img
+                                alt="Play/pause episode"
+                                className="episode-play-pause"
+                                src={this.state.playButtonSrc}
+                                onClick={this.togglePlayPause}/>
+                            :
+                            <div/>
+                    }
                 </div>
                 <p className="episode-description">
                     {truncateString(description).replace(/(<([^>]+)>)/gi, " ")}

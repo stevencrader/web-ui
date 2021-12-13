@@ -1,18 +1,17 @@
+import { ConnectedRouter } from 'connected-react-router'
+import { History } from 'history'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import store, { history } from './state/store'
 import { Provider } from 'react-redux'
-import { ConnectedRouter } from 'connected-react-router'
 import { Store } from 'redux'
-import { History } from 'history'
-
-import Topbar from './components/TopBar'
-import Routes from './routes'
 
 import LandingBG from '../images/landing-bg.svg'
-import './styles.scss'
 
-import { ApplicationState } from './state/store'
+import Topbar from './components/TopBar'
+import TopButton from "./components/TopButton";
+import Routes from './routes'
+import store, { ApplicationState, history } from './state/store'
+import './styles.scss'
 
 interface MainProps {
     store: Store<ApplicationState>
@@ -34,6 +33,7 @@ const Index: React.FC<MainProps> = ({ store, history }) => {
                     alt="Sidebar logo"
                 />
                 <Routes />
+                <TopButton/>
             </ConnectedRouter>
         </Provider>
     )

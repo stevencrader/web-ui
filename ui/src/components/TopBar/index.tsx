@@ -54,7 +54,7 @@ export default class Topbar extends React.PureComponent<IProps, IState> {
     render() {
         const { search, dropdownOpen } = this.state
         return (
-            <nav className="topbar">
+            <nav className="topbar" id="main-header">
                 <Link className="topbar-brand" to="/">
                     <img
                         // height={38}
