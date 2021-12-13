@@ -1,74 +1,122 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "array",
-  "items": {
-    "$ref": "#/definitions/App"
-  },
-  "definitions": {
-    "App": {
-      "type": "object",
-      "title": "App or Service",
-      "additionalProperties": false,
-      "required": [
-        "appName",
-        "appType",
-        "appIconUrl",
-        "appUrl",
-        "platforms",
-        "supportedElements"
-      ],
-      "properties": {
-        "appName": {
-          "type": "string"
-        },
-        "appType": {
-          "type": "string",
-          "enum": ["app", "hosting", "directory", "browser extension", "wordpress plugin", "website", "social links", "node hosting", "video", "other"]
-        },
-        "appUrl": {
-          "type": "string",
-          "format": "uri"
-        },
-        "appIconUrl": {
-          "type": "string",
-          "description": "Filename of png or jpg in assets folder"
-        },
-        "platforms": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": ["Web", "iOS", "Android", "macOS", "Windows", "Linux", "KaiOS", "Chrome", "Wordpress", "N/A"]
-          }
-        },
-        "supportedElements": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/SupportedElement"
-          }
-        },
-        "tagLine": {
-          "type": "string"
-        }
-      }
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "array",
+    "items": {
+        "$ref": "#/definitions/App"
     },
-    "SupportedElement": {
-      "type": "object",
-      "title": "Supported Element",
-      "additionalProperties": false,
-      "properties": {
-        "elementName": {
-          "type": "string",
-          "enum": ["Transcript", "Locked", "Funding", "Chapters", "Search", "Season", "Episode", "Soundbite", "Location", "Person", "Value"]
+    "definitions": {
+        "App": {
+            "type": "object",
+            "title": "App or Service",
+            "additionalProperties": false,
+            "required": [
+                "appName",
+                "appType",
+                "appIconUrl",
+                "appUrl",
+                "platforms",
+                "supportedElements"
+            ],
+            "properties": {
+                "appName": {
+                    "type": "string"
+                },
+                "appType": {
+                    "type": "string",
+                    "enum": [
+                        "app",
+                        "hosting",
+                        "directory",
+                        "browser extension",
+                        "wordpress plugin",
+                        "website",
+                        "social links",
+                        "node hosting",
+                        "video",
+                        "sn-network",
+                        "other"
+                    ]
+                },
+                "appUrl": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "appIconUrl": {
+                    "type": "string",
+                    "description": "Filename of png or jpg in assets folder"
+                },
+                "platforms": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "Web",
+                            "iOS",
+                            "Android",
+                            "macOS",
+                            "Windows",
+                            "Linux",
+                            "KaiOS",
+                            "Chrome",
+                            "Wordpress",
+                            "Sailfish OS",
+                            "BSD",
+                            "AmigaOS 4",
+                            "N/A"
+                        ]
+                    }
+                },
+                "supportedElements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SupportedElement"
+                    }
+                },
+                "tagLine": {
+                    "type": "string"
+                }
+            }
         },
-        "elementURL": {
-          "type": "string",
-          "format": "uri"
+        "SupportedElement": {
+            "type": "object",
+            "title": "Supported Element",
+            "additionalProperties": false,
+            "properties": {
+                "elementName": {
+                    "type": "string",
+                    "enum": [
+                        "Transcript",
+                        "Locked",
+                        "Funding",
+                        "Chapters",
+                        "Soundbite",
+                        "Person",
+                        "Location",
+                        "Season",
+                        "Episode",
+                        "Trailer",
+                        "License",
+                        "Alternate Enclosure",
+                        "Source",
+                        "Integrity",
+                        "Guid",
+                        "Value",
+                        "Value Recipient",
+                        "Medium",
+                        "Images",
+                        "Search",
+                        "Sn-Network",
+                        "Synchronize"
+                    ]
+                },
+                "elementURL": {
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "required": [
+                "elementName"
+            ]
         }
-      },
-      "required": [
-        "elementName",
-        "elementURL"
-      ]
     }
-  }
 }
